@@ -320,7 +320,7 @@ spec:
             value: "{{ .Values.clusterName }}"
           - name: network.host
             value: "{{ .Values.networkHost }}"
-          {{- if .Values.clusterDeprecationIndexing }}
+          {{- if ge (int (include "elasticsearch.esMajorVersion" .)) 7 }}
           - name: cluster.deprecation_indexing.enabled
             value: "{{ .Values.clusterDeprecationIndexing }}"
           {{- end }}
