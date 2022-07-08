@@ -32,11 +32,11 @@ GET _cluster/allocation/explain?pretty
 GET _cat/repositories
 
 # Create a snapshot repository
-PUT _snapshot/azure_repo_staging
+PUT _snapshot/azure_repo_develop
 {
   "type": "azure",
   "settings": {
-    "container": "snapshots-staging",
+    "container": "snapshots-devel",
     "base_path" : "backups"
   }
 }
@@ -45,7 +45,7 @@ PUT _snapshot/azure_repo_staging
 GET _snapshot/azure_repo_staging/_all
 
 # Get resumed list of snapshots on a repository
-GET _cat/snapshots/azure_repo_staging/?v&s=id
+GET _cat/snapshots/azure_repo_develop/?v&s=id
 
 # Create snapshot
 PUT /_snapshot/azure_repo_staging/preview_snapshot_20220708?wait_for_completion=true
@@ -59,8 +59,12 @@ PUT /_snapshot/azure_repo_staging/preview_snapshot_20220708?wait_for_completion=
   }
 }
 
+# Delete index
+
+DELETE /nkobjects_dkv_v09_develop
+
 # Restore snapshot
-POST _snapshot/azure_repo_staging/preview_snapshot_20220708/_restore
+POST _snapshot/azure_repo_develop/develop_snapshot_20220708/_restore
 
 # Change specific setting on a index
 PUT /nkobjects_dkv_v09_legacy/_settings
