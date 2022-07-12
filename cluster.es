@@ -63,10 +63,10 @@ POST _snapshot/azure_repo_staging/nkobjects-20220410200007/_restore
 PUT /nkobjects_dkv_v09_legacy/_settings
 { "index.routing.allocation.include._name" : "" }
 
-PUT /nkobjects_dkv_v09_legacy/_settings
+PUT /nkobjects_dkv_v09_staging/_settings
 {
   "index" : {
-    "number_of_replicas" : 0
+    "number_of_replicas" : 2
   }
 }
 
