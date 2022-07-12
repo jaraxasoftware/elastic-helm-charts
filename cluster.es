@@ -19,6 +19,9 @@ GET _search
 # Get cluster info and health
 GET _cluster/health?pretty
 
+# Get indices
+GET /_cat/indices
+
 # Get shards info
 GET /_cat/shards?h=index,shard,prirep,state,unassigned.reason
 
@@ -29,11 +32,11 @@ GET _cluster/allocation/explain?pretty
 GET _cat/repositories
 
 # Create a snapshot repository
-PUT _snapshot/azure_repo_staging
+PUT _snapshot/azure_repo_develop
 {
   "type": "azure",
   "settings": {
-    "container": "snapshots-staging",
+    "container": "snapshots-devel",
     "base_path" : "backups"
   }
 }
@@ -42,12 +45,12 @@ PUT _snapshot/azure_repo_staging
 GET _snapshot/azure_repo_staging/_all
 
 # Get resumed list of snapshots on a repository
-GET _cat/snapshots/azure_repo_staging/?v&s=id
+GET _cat/snapshots/azure_repo_develop/?v&s=id
 
 # Create snapshot
-PUT /_snapshot/azure_repo/manual_snapshot_20220707?wait_for_completion=true
+PUT /_snapshot/azure_repo_staging/preview_snapshot_20220708?wait_for_completion=true
 {
-  "indices": "nkobjects_dkv_v09_legacy",
+  "indices": "nkobjects_dkv_v09_local",
   "ignore_unavailable": true,
   "include_global_state": false,
   "metadata": {
@@ -56,8 +59,12 @@ PUT /_snapshot/azure_repo/manual_snapshot_20220707?wait_for_completion=true
   }
 }
 
+# Delete index
+
+DELETE /nkobjects_dkv_v09_develop
+
 # Restore snapshot
-POST _snapshot/azure_repo_staging/nkobjects-20220410200007/_restore
+POST _snapshot/azure_repo_develop/develop_snapshot_20220708/_restore
 
 # Change specific setting on a index
 PUT /nkobjects_dkv_v09_legacy/_settings
@@ -74,10 +81,10 @@ PUT /nkobjects_dkv_v09_staging/_settings
 POST /_reindex?pretty
 {
     "source": {
-        "index": "nkobjects_dkv_v09_legacy"
+        "index": "nkobjects_dkv_v09_local"
     },
     "dest": {
-        "index": "nkobjects_dkv_v09_staging"
+        "index": "nkobjects_dkv_v09_preview"
     }
 }
 
