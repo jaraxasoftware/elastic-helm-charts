@@ -20,7 +20,7 @@ GET _search
 GET _cluster/health?pretty
 
 # Get indices
-GET /_cat/indices
+GET /_cat/indices/
 
 # Get shards info
 GET /_cat/shards?h=index,shard,prirep,state,unassigned.reason
@@ -28,31 +28,37 @@ GET /_cat/shards?h=index,shard,prirep,state,unassigned.reason
 # Get information for shards assigning
 GET _cluster/allocation/explain?pretty
 
+# Retry allocation
+POST _cluster/reroute?retry_failed
+
 # Get snapshots repositories
 GET _cat/repositories
 
 # Create a snapshot repository
-PUT _snapshot/azure_repo_develop
+PUT _snapshot/azure_repo_production_AKS02
 {
   "type": "azure",
   "settings": {
-    "container": "snapshots-devel",
+    "container": "snapshots-production",
     "base_path" : "backups"
   }
 }
 
 # Get detailed list with info for snapshots on a repository
-GET _snapshot/azure_repo_staging/_all
+GET _snapshot/azure_repo_production_AKS02/nkobjects-20220830
+
+# Get detailed list with info for snapshots on a repository
+GET _snapshot/azure_repo/production_snapshot_20220831
 
 # Get resumed list of snapshots on a repository
-GET _cat/snapshots/azure_repo_develop/?v&s=id
+GET _cat/snapshots/azure_repo/?v&s=id
 
 # Create snapshot
-PUT /_snapshot/azure_repo_staging/preview_snapshot_20220708?wait_for_completion=true
+PUT /_snapshot/azure_repo/sec_production_snapshot_20220831?wait_for_completion=true
 {
-  "indices": "nkobjects_dkv_v09_local",
+  "indices": ".security-6",
   "ignore_unavailable": true,
-  "include_global_state": false,
+  "include_global_state": true,
   "metadata": {
     "taken_by": "sjg",
     "taken_because": "backup before migration"
@@ -61,20 +67,40 @@ PUT /_snapshot/azure_repo_staging/preview_snapshot_20220708?wait_for_completion=
 
 # Delete index
 
-DELETE /nkobjects_dkv_v09_develop
+DELETE /.security-6
 
 # Restore snapshot
-POST _snapshot/azure_repo_develop/develop_snapshot_20220708/_restore
+POST _snapshot/azure_repo_production_AKS02/sec_production_snapshot_20220831/_restore
 
 # Change specific setting on a index
 PUT /nkobjects_dkv_v09_legacy/_settings
 { "index.routing.allocation.include._name" : "" }
 
-PUT /nkobjects_dkv_v09_staging/_settings
+PUT /nkobjects_dkv_v09_production/_settings
 {
   "index" : {
     "number_of_replicas" : 2
   }
+}
+
+GET /_cluster/settings
+
+PUT /_cluster/settings?flat_settings=true
+{
+  "persistent" : {
+    "cluster.routing.rebalance.enable": "all",
+    "cluster.routing.allocation.allow_rebalance": "indices_all_active",
+    "cluster.routing.allocation.cluster_concurrent_rebalance":"5",
+    "cluster.routing.allocation.node_concurrent_incoming_recoveries":"10",
+    "cluster.routing.allocation.node_concurrent_outgoing_recoveries":"10"
+	}
+}
+
+PUT /_cluster/settings
+{
+    "persistent" : {
+      "indices.recovery.max_bytes_per_sec" : "2500mb"
+    }
 }
 
 ##Make a reindex from one index to other - DANGEROUS
@@ -88,4 +114,22 @@ POST /_reindex?pretty
     }
 }
 
+# Add geoip pipeline
 
+PUT _ingest/pipeline/geoip-info-proxy
+{
+  "description" : "Add geoip info",
+  "processors" : [
+    {
+      "geoip" : {
+        "field" : "ip"
+      }
+    }
+  ]
+}
+
+
+DELETE _template/filebeat*
+
+
+GET _ingest/pipeline/
