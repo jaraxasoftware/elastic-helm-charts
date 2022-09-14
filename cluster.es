@@ -20,10 +20,10 @@ GET _search
 GET _cluster/health?pretty
 
 # Get indices
-GET /_cat/indices/
+GET /_cat/indices/filebeat-*
 
 # Get shards info
-GET /_cat/shards?h=index,shard,prirep,state,unassigned.reason
+GET /_cat/shards/nkobjects_dkv_v09_production?h=index,shard,prirep,state,unassigned.reason,node
 
 # Get information for shards assigning
 GET _cluster/allocation/explain?pretty
@@ -45,32 +45,32 @@ PUT _snapshot/azure_repo_production_AKS02
 }
 
 # Get detailed list with info for snapshots on a repository
-GET _snapshot/azure_repo_production_AKS02/nkobjects-20220830
+GET _snapshot/azure_repo_production_AKS02/metricbeat_logs_20220906
 
 # Get detailed list with info for snapshots on a repository
-GET _snapshot/azure_repo/production_snapshot_20220831
+GET _snapshot/azure_repo/production_snapshot_20220903_2
 
 # Get resumed list of snapshots on a repository
-GET _cat/snapshots/azure_repo/?v&s=id
+GET _cat/snapshots/azure_repo_production_AKS02/?v&s=id
 
 # Create snapshot
-PUT /_snapshot/azure_repo/sec_production_snapshot_20220831?wait_for_completion=true
+PUT /_snapshot/azure_repo/metricbeat_logs_20220906
 {
-  "indices": ".security-6",
-  "ignore_unavailable": true,
-  "include_global_state": true,
+  "indices": "metricbeat-*",
+  "ignore_unavailable": false,
+  "include_global_state": false,
   "metadata": {
     "taken_by": "sjg",
-    "taken_because": "backup before migration"
+    "taken_because": "backup for logs"
   }
 }
 
 # Delete index
 
-DELETE /.security-6
+DELETE /nkobjects_dkv_v09_production
 
 # Restore snapshot
-POST _snapshot/azure_repo_production_AKS02/sec_production_snapshot_20220831/_restore
+POST _snapshot/azure_repo_production_AKS02/production_snapshot_20220903_2/_restore
 
 # Change specific setting on a index
 PUT /nkobjects_dkv_v09_legacy/_settings
