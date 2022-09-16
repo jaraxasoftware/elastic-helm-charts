@@ -8,6 +8,8 @@
 # - Use VSCode command 'Elastic: Set Host' to create connection profile and connect.
 # - Alt + Enter / Ctrl + Enter to execute selected query.
 # - You will also going to need a port-forward to our ES installations
+# - In order to connect to ES on k8s, execute:
+# - kubectl port-forward services/netcomp-elastic-legacy 9200:9200 -n <namespace>
 
 GET _search
 {
@@ -61,7 +63,7 @@ PUT /_snapshot/azure_repo_staging/preview_snapshot_20220708?wait_for_completion=
 
 # Delete index
 
-DELETE /nkobjects_dkv_v09_develop
+DELETE /metricbeat*
 
 # Restore snapshot
 POST _snapshot/azure_repo_develop/develop_snapshot_20220708/_restore
@@ -70,10 +72,10 @@ POST _snapshot/azure_repo_develop/develop_snapshot_20220708/_restore
 PUT /nkobjects_dkv_v09_legacy/_settings
 { "index.routing.allocation.include._name" : "" }
 
-PUT /nkobjects_dkv_v09_staging/_settings
+PUT /nkobjects_dkv_v09_preview/_settings
 {
   "index" : {
-    "number_of_replicas" : 2
+    "number_of_replicas" : 1
   }
 }
 
