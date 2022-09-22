@@ -37,23 +37,26 @@ POST _cluster/reroute?retry_failed
 GET _cat/repositories
 
 # Create a snapshot repository
-PUT _snapshot/azure_repo_production_AKS02
+PUT _snapshot/azure_repo_prod_backup
 {
   "type": "azure",
   "settings": {
-    "container": "snapshots-production",
+    "container": "snapshots-prod-copy",
     "base_path" : "backups"
   }
 }
 
 # Get detailed list with info for snapshots on a repository
-GET _snapshot/azure_repo_production_AKS02/metricbeat_logs_20220906
+GET _snapshot/azure_repo_prod_backup/
+
+# Delete Snapshot Repository. When a repository is unregistered, Elasticsearch only removes the reference to the location where the repository is storing the snapshots. The snapshots themselves are left untouched and in place.
+DELETE _snapshot/azure_repo_production/
 
 # Get detailed list with info for snapshots on a repository
-GET _snapshot/azure_repo/production_snapshot_20220903_2
+GET _snapshot/azure_repo_prod_backup/kibana-*
 
 # Get resumed list of snapshots on a repository
-GET _cat/snapshots/azure_repo_production_AKS02/?v&s=id
+GET _cat/snapshots/azure_repo_prod_backup/?v&s=id
 
 # Create snapshot
 PUT /_snapshot/azure_repo/metricbeat_logs_20220906
@@ -67,21 +70,27 @@ PUT /_snapshot/azure_repo/metricbeat_logs_20220906
   }
 }
 
-# Delete index
 
+# Delete snapshot
+DELETE _snapshot/azure_repo_prod_backup/kibana-20210119
+
+# Delete index
 DELETE /metricbeat*
 
 # Restore snapshot
-POST _snapshot/azure_repo_production_AKS02/production_snapshot_20220903_2/_restore
+POST _snapshot/azure_repo_prod_backup/filebeat_logs_20220906/_restore
+{
+  "indices": "filebeat-6.8.6-2022.09.02"
+}
 
 # Change specific setting on a index
 PUT /nkobjects_dkv_v09_legacy/_settings
 { "index.routing.allocation.include._name" : "" }
 
-PUT /nkobjects_dkv_v09_preview/_settings
+PUT /filebeat-6.8.6-2022.09.02/_settings
 {
   "index" : {
-    "number_of_replicas" : 1
+    "number_of_replicas" : 0
   }
 }
 
