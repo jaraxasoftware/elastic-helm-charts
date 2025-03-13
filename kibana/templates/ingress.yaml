@@ -76,7 +76,7 @@ metadata:
 {{- end }}
 spec:
   {{- if .Values.ingressInternal.className }}
-  ingressClassName: {{ .Values.ingress.className | quote }}
+  ingressClassName: {{ .Values.ingressInternal.className | quote }}
   {{- end }}
 {{- if .Values.ingressInternal.tls }}
   tls:
