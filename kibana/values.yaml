@@ -150,6 +150,22 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+ingressInternal:
+  enabled: false
+  className: "internal-nginx"
+  pathtype: ImplementationSpecific
+  annotations: {}
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: internal.kibana-example.local
+      paths:
+        - path: /
+  #tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
 readinessProbe:
   failureThreshold: 3
   initialDelaySeconds: 10
